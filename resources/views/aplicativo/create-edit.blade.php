@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Update - Jogo na Praia</title>
+        <title>Update - Novo Aplicativo</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
@@ -46,7 +46,7 @@
             }
 
             .title {
-                font-size: 84px;
+                font-size: 42px;
             }
 
             .links > a {
@@ -66,28 +66,41 @@
     </head>
     <body>
         <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
-                    @endauth
-                </div>
-            @endif
-
             <div class="content">
                 <div class="title m-b-md">
-                    Jogo na Praia
+                    Cadastro
                 </div>
 
-                <div class="links">
-                    <a href="{{ url('/jogo_na_praia/instalacao') }}">Instalação</a>
-                    <a href="{{ url('/jogo_na_praia/versoes') }}">Versões</a>
-                    <a href="{{ url('/jogo_na_praia/documentacao') }}">Documentação</a>
-                    <a href="https://gitlab.com/HERCOLYSM/jogo_na_praia">GitLab</a>
-                </div>
+                <center>
+                    <form method="POST" action="{{ url('/aplicativo/store') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}" >
+                        <input type="hidden" name="id_aplicativo" value="{{ $aplicativo->id_aplicativo ?? '' }}">
+                        <div>
+                            <label>Nome</label>
+                            <br>
+                            <input type="text" name="nome" value="{{ $aplicativo->nome ?? '' }}" required="required">
+                        </div>
+                         <div>
+                            <label>Descrição</label>
+                            <br>
+                            <input type="text" name="descricao" value="{{ $aplicativo->descricao ?? '' }}" required="required">
+                        </div>
+                        <div>
+                            <label>GitHub</label>
+                            <br>
+                            <input type="text" name="github" value="{{ $aplicativo->github ?? '' }}">
+                        </div>
+                        <div>
+                            <label>GitLab</label>
+                            <br>
+                            <input type="text" name="gitlab" value="{{ $aplicativo->gitlab ?? '' }}">
+                        </div>
+                        <div>
+                            <a href="{{ url('/aplicativo') }}">Voltar</a>
+                            <button type="submit">Salvar</button>
+                        </div>
+                    </form>
+                </center>
             </div>
         </div>
     </body>

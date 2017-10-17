@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateTableProjetos extends Migration
+class CreateTableAplicativo extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,12 @@ class CreateTableProjetos extends Migration
      */
     public function up()
     {
-        //
-        Schema::create('projetos', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create('aplicativo', function (Blueprint $table) {
+            $table->increments('id_aplicativo');
             $table->string('nome');
             $table->text('descricao');
-            $table->string('github');
-            $table->string('gitlab');
+            $table->string('github')->nullable();
+            $table->string('gitlab')->nullable();
             $table->timestamps();
         });
     }
@@ -31,7 +30,6 @@ class CreateTableProjetos extends Migration
      */
     public function down()
     {
-        //
-        Schema::dropIfExists('projetos');
+        Schema::dropIfExists('aplicativo');
     }
 }

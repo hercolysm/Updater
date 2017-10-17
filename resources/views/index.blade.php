@@ -83,9 +83,10 @@
                 </div>
 
                 <div class="links">
-                    <a href="{{ url('/jogo_na_praia') }}">Entrar</a>
+                    <a href="{{ url('/login') }}">Entrar</a>
+                    <a href="{{ url('/aplicativo') }}">Aplicativos</a>
                     <a href="#">Documentação</a>
-                    <a href="#">GitHub</a>
+                    <a href="https://github.com/hercolysm/Updater" target="_blank">GitHub</a>
                 </div>
             </div>
         </div>

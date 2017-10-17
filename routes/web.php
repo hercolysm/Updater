@@ -11,36 +11,34 @@
 |
 */
 
-/*
-Route::get('/', function () {
-    return view('welcome');
-});
-*/
-
 Route::get('/', function () {
 	return view('index');
 });
 
-Route::prefix('jogo_na_praia')->group( function () {
+Route::get('/aplicativo', 'AplicativoController@index');
 
-	Route::get('/', function () {
-		return view('jogo_na_praia.index');
-	});
-
-	Route::get('/instalacao', function () {
-		return view('jogo_na_praia.instalacao.index');
-	});
-
-	Route::get('/versoes', 'JogoNaPraiaController@index');
-
-	Route::get('/versoes/create', 'JogoNaPraiaController@create');
-
-	Route::get('/versoes/edit/{param1}', 'JogoNaPraiaController@edit');
-
-	Route::post('/versoes/store', 'JogoNaPraiaController@store');
-
-	Route::get('/documentacao', function () {
-		return view('jogo_na_praia.documentacao.index');
-	});
-
+Route::get('/aplicativo/create', function () {
+	return view('aplicativo.create-edit');
 });
+
+Route::get('/aplicativo/edit/{id_aplicativo}', 'AplicativoController@edit');
+
+Route::post('/aplicativo/store', 'AplicativoController@store');
+
+Route::get('/aplicativo/destroy/{id_aplicativo}', 'AplicativoController@destroy');
+
+Route::get('/aplicativo/{id_aplicativo}', 'AplicativoController@show');
+
+Route::get('/aplicativo/{id_aplicativo}/instalacao', 'InstalacaoController@index');
+
+Route::get('/aplicativo/{id_aplicativo}/documentacao', 'DocumantacaoController@index');
+
+Route::get('/aplicativo/{id_aplicativo}/versao', 'VersaoController@index');
+
+Route::get('/aplicativo/{id_aplicativo}/versao/create', 'VersaoController@create');
+
+Route::get('/aplicativo/{id_aplicativo}/versao/edit/{id_versao}', 'VersaoController@edit');
+
+Route::post('/aplicativo/{id_aplicativo}/versao/store', 'VersaoController@store');
+
+Route::get('/aplicativo/{id_aplicativo}/versao/destroy/{id_versao}', 'VersaoController@destroy');

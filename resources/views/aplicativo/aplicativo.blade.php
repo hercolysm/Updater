@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Update - Jogo na Praia - Versões</title>
+        <title>Updater - {{ $aplicativo->nome }}</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
@@ -26,7 +26,8 @@
             }
 
             .flex-center {
-                margin-top: 80px;
+                align-items: center;
+                display: flex;
                 justify-content: center;
             }
 
@@ -45,25 +46,21 @@
             }
 
             .title {
-                font-size: 42px;
+                font-size: 84px;
             }
 
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-
-            .table-versoes > thead > tr > th {
+            .links > a {
                 color: #636b6f;
+                padding: 0 25px;
                 font-size: 12px;
                 font-weight: 600;
                 letter-spacing: .1rem;
                 text-decoration: none;
                 text-transform: uppercase;
-                text-align: left;
             }
 
-            .table-versoes > thead > tr > th {
-                padding: 5px;
+            .m-b-md {
+                margin-bottom: 30px;
             }
         </style>
     </head>
@@ -71,30 +68,20 @@
         <div class="flex-center position-ref full-height">
             <div class="content">
                 <div class="title m-b-md">
-                    Jogo na Praia -> Versões
+                    {{ $aplicativo->nome }}
                 </div>
 
-                <center>
-                    <table class="table-versoes">
-                        <thead>
-                            <tr>
-                                <th width="50%">Versão</th>
-                                <th width="10%"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($versoes as $versao)
-                                <tr>
-                                    <td>{{ $versao }}</td>
-                                    <td><a href="{{ url('/jogo_na_praia/versoes/edit/{1}') }}">Detalhes</a></td>
-                                </tr>
-                            @endforeach
-                            <tr>
-                                <td colspan="2"><a href="{{ url('/jogo_na_praia/versoes/create') }}">Nova Versão</a></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </center>
+                <div class="links">
+                    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/instalacao') }}">Instalação</a>
+                    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao') }}">Versões</a>
+                    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/documentacao') }}">Documentação</a>
+                    @if ($aplicativo->github)
+                        <a href="{{ $aplicativo->github }}" target="_blank">GitHub</a>
+                    @endif
+                    @if ($aplicativo->gitlab)
+                        <a href="{{ $aplicativo->gitlab }}" target="_blank">GitLab</a>
+                    @endif
+                </div>
             </div>
         </div>
     </body>
