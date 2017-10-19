@@ -42,3 +42,5 @@ Route::get('/aplicativo/{id_aplicativo}/versao/edit/{id_versao}', 'VersaoControl
 Route::post('/aplicativo/{id_aplicativo}/versao/store', 'VersaoController@store');
 
 Route::get('/aplicativo/{id_aplicativo}/versao/destroy/{id_versao}', 'VersaoController@destroy');
+
+Route::get('/aplicativo/{id_aplicativo}/versao/enviar/{id_versao}', 'VersaoController@enviar');

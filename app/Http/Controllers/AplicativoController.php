@@ -42,8 +42,19 @@ class AplicativoController extends Controller
         $descricao = $request->input('descricao');
         $github = $request->input('github');
         $gitlab = $request->input('gitlab');
+        $desenvolvimento = $request->input('desenvolvimento');
+        $producao = $request->input('producao');
+        $backup = $request->input('backup');
 
-        $aplicativo = ['nome' => $nome, 'descricao' => $descricao, 'github' => $github, 'gitlab' => $gitlab];
+        $aplicativo = [
+            'nome' => $nome, 
+            'descricao' => $descricao, 
+            'github' => $github, 
+            'gitlab' => $gitlab, 
+            'desenvolvimento' => $desenvolvimento,
+            'producao' => $producao,
+            'backup' => $backup
+        ];
 
         if (!$id_aplicativo) {
             DB::table('aplicativo')->insert($aplicativo);

@@ -87,6 +87,9 @@
                                 <tr>
                                     <td>{{ $versao->id_versao }}</td>
                                     <td>
+                                        @if ($versao->enviado == 0)
+                                            <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/enviar/'. $versao->id_versao) }}">Enviar</a>
+                                        @endif
                                         <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/edit/'. $versao->id_versao) }}">Editar</a>
                                         <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/destroy/'. $versao->id_versao) }}">Excluir</a>
                                     </td>

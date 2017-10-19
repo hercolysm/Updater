@@ -96,6 +96,21 @@
                             <input type="text" name="gitlab" value="{{ $aplicativo->gitlab ?? '' }}">
                         </div>
                         <div>
+                            <label>Desenvolvimento</label>
+                            <br>
+                            <input type="text" name="desenvolvimento" value="{{ $aplicativo->desenvolvimento ?? '' }}">
+                        </div>
+                        <div>
+                            <label>Produção</label>
+                            <br>
+                            <input type="text" name="producao" value="{{ $aplicativo->producao ?? '' }}">
+                        </div>
+                        <div>
+                            <label>Backup</label>
+                            <br>
+                            <input type="text" name="backup" value="{{ $aplicativo->backup ?? '' }}">
+                        </div>
+                        <div>
                             <a href="{{ url('/aplicativo') }}">Voltar</a>
                             <button type="submit">Salvar</button>
                         </div>

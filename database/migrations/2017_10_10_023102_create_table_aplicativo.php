@@ -19,6 +19,9 @@ class CreateTableAplicativo extends Migration
             $table->text('descricao');
             $table->string('github')->nullable();
             $table->string('gitlab')->nullable();
+            $table->string('desenvolvimento');
+            $table->string('producao');
+            $table->string('backup');
             $table->timestamps();
         });
     }

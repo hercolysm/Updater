@@ -116,4 +116,46 @@ class VersaoController extends Controller
 
         return redirect('/aplicativo/'.$id_aplicativo.'/versao');
     }
+
+    /**
+     * Envia a versao para o servidor
+     *
+     * @param int $id_aplicativo
+     * @param int $id_versao
+     * @return \Illuminate\Http\Response
+     */
+    public function enviar($id_aplicativo, $id_versao)
+    {
+        $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
+        $versao = VersaoModel::find($id_versao);
+
+        $aplicativo_none = str_replace(' ', '_', strtolower($aplicativo->nome));
+        $desenvolvimento = $aplicativo->desenvolvimento;
+        $producao = $aplicativo->producao;
+        $arquivos = explode("\r\n", $versao->arquivo);
+
+        $compactar_arquivos = '';
+
+        foreach ($arquivos as $key => $value) {
+            $compactar_arquivos .= ' '.$desenvolvimento.'/'.$value;
+        }
+
+        $temp_dir = sys_get_temp_dir();
+        $arquivo_tar = $aplicativo_none.'_v'.$versao->id_versao.'.tar';
+
+        exec('tar -cf '.$temp_dir.'/'.$arquivo_tar.' '.$compactar_arquivos);
+        exec('gzip -9f '.$temp_dir.'/'.$arquivo_tar);
+
+        if (!file_exists(__DIR__.'/../../../storage/app/'.$aplicativo_none)) {
+            exec('sudo mkdir '.__DIR__.'/../../../storage/app/'.$aplicativo_none);
+            exec('sudo chmod 757 '.__DIR__.'/../../../storage/app/'.$aplicativo_none);
+        }
+
+        exec('mv '.$temp_dir.'/'.$arquivo_tar.'.gz '.__DIR__.'/../../../storage/app/'.$aplicativo_none);
+
+        $versao->enviado = 1;
+        $versao->save();
+
+        return redirect('/aplicativo/'.$id_aplicativo.'/versao');
+    }
 }
