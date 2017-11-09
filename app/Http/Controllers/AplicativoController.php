@@ -4,9 +4,20 @@ namespace Updater\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Updater\Models\VersaoModel;
 
 class AplicativoController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,8 +26,9 @@ class AplicativoController extends Controller
     public function index()
     {
         $lista = DB::table('aplicativo')->get();
+        $VersaoModel = new VersaoModel();
 
-        return view('aplicativo.index', ['lista' => $lista]);
+        return view('aplicativo.index', ['lista' => $lista, 'VersaoModel' => $VersaoModel]);
     }
 
     /**
@@ -45,6 +57,7 @@ class AplicativoController extends Controller
         $desenvolvimento = $request->input('desenvolvimento');
         $producao = $request->input('producao');
         $backup = $request->input('backup');
+        $date = date('Y-m-d H:i:s');
 
         $aplicativo = [
             'nome' => $nome, 
@@ -53,10 +66,12 @@ class AplicativoController extends Controller
             'gitlab' => $gitlab, 
             'desenvolvimento' => $desenvolvimento,
             'producao' => $producao,
-            'backup' => $backup
+            'backup' => $backup,
+            'updated_at' => $date
         ];
 
         if (!$id_aplicativo) {
+            $aplicativo['created_at'] = $date;
             DB::table('aplicativo')->insert($aplicativo);
         } else {
             DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->update($aplicativo);
@@ -115,5 +130,26 @@ class AplicativoController extends Controller
         DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->delete();
 
         return redirect('/aplicativo');
+    }
+
+    /**
+     *
+     *
+     *
+     *
+     */
+    public function sobre($id_aplicativo)
+    {
+        $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
+        $readme = $aplicativo->desenvolvimento . '/README.md';
+
+        if (file_exists($readme)) {
+            $file = fopen($readme, 'r');
+        }
+        else {
+            $file = false;
+        }
+
+        return view('aplicativo.sobre', ['aplicativo' => $aplicativo, 'file' => $file]);
     }
 }

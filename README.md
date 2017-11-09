@@ -1,6 +1,8 @@
 # Updater
 
-Updater é um software gratuito capaz de gerênciar pequenos ou grandes projetos, fornecendo suporte a instalação, documentação e todo o controle de versionamento necessário para uma aplicação.
+Updater é um software gratuito capaz de gerênciar pequenos ou grandes projetos, fornecendo 
+suporte a instalação, documentação e todo o controle de versionamento necessário para uma 
+aplicação.
 
 ============================================================================================
 

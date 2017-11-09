@@ -26,8 +26,11 @@ class CreateTableVersao extends Migration
             $table->text('arquivo')->nullable();
             $table->text('sql')->nullable();
             $table->text('script')->nullable();
-            $table->boolean('enviado')->default(0);
             $table->timestamps();
+            $table->boolean('arquivo_gerado')->default(0);
+            $table->string('arquivo_nome')->nullable();
+            $table->boolean('arquivo_enviado')->default(0);
+            $table->dateTime('data_envio')->nullable();
             $table->foreign('id_aplicativo')->references('id_aplicativo')->on('aplicativo')->onDelete('cascade')->onUpdate('cascade');
         });
     }

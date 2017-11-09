@@ -1,113 +1,51 @@
-<!doctype html>
-<html lang="{{ app()->getLocale() }}">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('layouts.lista')
 
-        <title>Updater - {{ $aplicativo->nome }} - Versões</title>
+@section('title', ' - ' . $aplicativo->nome . ' - Versões')
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+@section('titulo_principal')
+    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo) }}">{{ $aplicativo->nome }}</a>
+@endsection
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Raleway', sans-serif;
-                font-weight: 100;
-                height: 100vh;
-                margin: 0;
-            }
-
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                margin-top: 80px;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 42px;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-
-            .table-aplicativos > thead > tr > th {
-                color: #636b6f;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-                text-align: left;
-            }
-
-            .table-aplicativos > thead > tr > th {
-                padding: 5px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            <div class="content">
-                <div class="title m-b-md">
-                    {{ $aplicativo->nome }}
-                </div>
-
-                <center>
-                    <table class="table-aplicativos">
-                        <thead>
-                            <tr>
-                                <th width="50%">Versões</th>
-                                <th width="20%"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($versoes as $versao)
-                                <tr>
-                                    <td>{{ $versao->id_versao }}</td>
-                                    <td>
-                                        @if ($versao->enviado == 0)
-                                            <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/enviar/'. $versao->id_versao) }}">Enviar</a>
-                                        @endif
-                                        <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/edit/'. $versao->id_versao) }}">Editar</a>
-                                        <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/destroy/'. $versao->id_versao) }}">Excluir</a>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2">Nenhuma versão encontrada</td>
-                                </tr>
-                            @endforelse
-                            <tr>
-                                <td colspan="2">
-                                    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo) }}">Voltar</a>
-                                    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/create') }}">Nova Versão</a></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </center>
-            </div>
-        </div>
-    </body>
-</html>
+@section('content')
+    <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/create') }}" class="pull-right">Nova Versão</a>
+    <table class="table table-hover table-striped">
+        <thead>
+            <tr>
+                <th colspan="4">Versão</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($versoes as $versao)
+                <tr>
+                    <td>{{ $VersaoModel::getVersao($aplicativo->id_aplicativo, $versao->id_versao) }}</td>
+                    <td>
+                        <ul class="list-inline pull-right">
+                            @if(!$versao->arquivo_enviado)
+                                <li><a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/edit/'. $versao->id_versao) }}">Editar</a></li>
+                                <li><a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/destroy/'. $versao->id_versao) }}">Excluir</a></li>
+                            @endif
+                        </ul>
+                    </td>
+                    <td class="text-center col-xs-1">
+                        @if($versao->arquivo_gerado)
+                            <p class="text-success">Gerado</p>
+                        @else
+                            <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/gerar/'. $versao->id_versao) }}" class="text-warning">Gerar</a>
+                        @endif
+                    </td>
+                    <td class="text-center col-xs-1">
+                        @if($versao->arquivo_enviado)
+                            <p class="text-success" title="{{ 'Enviado ' . date('d/m/Y H:i:s', strtotime($versao->data_envio)) }}">Enviado</p>
+                        @else
+                            <a href="{{ url('/aplicativo/'. $aplicativo->id_aplicativo .'/versao/enviar/'. $versao->id_versao) }}" class="text-warning">Enviar</a>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="4" class="text-center">Nenhuma versão encontrada</td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+@endsection

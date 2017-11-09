@@ -15,6 +15,12 @@ Route::get('/', function () {
 	return view('index');
 });
 
+Auth::routes();
+
+Route::get('/sobre', 'IndexController@sobre');
+
+Route::get('/logout', 'Auth\LoginController@logout');
+
 Route::get('/aplicativo', 'AplicativoController@index');
 
 Route::get('/aplicativo/create', function () {
@@ -43,4 +49,8 @@ Route::post('/aplicativo/{id_aplicativo}/versao/store', 'VersaoController@store'
 
 Route::get('/aplicativo/{id_aplicativo}/versao/destroy/{id_versao}', 'VersaoController@destroy');
 
+Route::get('/aplicativo/{id_aplicativo}/versao/gerar/{id_versao}', 'VersaoController@gerar');
+
 Route::get('/aplicativo/{id_aplicativo}/versao/enviar/{id_versao}', 'VersaoController@enviar');
+
+Route::get('/aplicativo/{id_aplicativo}/sobre', 'AplicativoController@sobre');

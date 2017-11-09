@@ -9,6 +9,16 @@ use Updater\Models\VersaoModel;
 class VersaoController extends Controller
 {
     /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -16,11 +26,13 @@ class VersaoController extends Controller
     public function index($id_aplicativo)
     {
         $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
-        $versoes = VersaoModel::where('id_aplicativo', $id_aplicativo)->get();
+        $versoes = VersaoModel::where('id_aplicativo', $id_aplicativo)->orderBy('id_versao', 'desc')->get();
+        $VersaoModel = new VersaoModel();
 
         return view('aplicativo.versao.index', [
             'aplicativo' => $aplicativo,
-            'versoes' => $versoes
+            'versoes' => $versoes,
+            'VersaoModel' => $VersaoModel
         ]);
     }
 
@@ -44,25 +56,36 @@ class VersaoController extends Controller
      */
     public function store(Request $request, $id_aplicativo)
     {
+        $versao = [
+            'id_aplicativo' => $id_aplicativo,
+            'incompativel' => $request->incompativel,
+            'implementacao' => $request->implementacao,
+            'correcao' => $request->correcao,
+            'pre_lancamento' => $request->pre_lancamento,
+            'identificador' => $request->identificador,
+            'descricao_implementacao' => $request->descricao_implementacao,
+            'descricao_correcao' => $request->descricao_correcao,
+            'arquivo' => $request->arquivo,
+            'sql' => $request->sql,
+            'script' => $request->script,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+
         if (!$request->id_versao) {
-            $versao = new VersaoModel();
+            $versao['created_at'] = date('Y-m-d H:i:s');
+            $id_versao = DB::table('versao')->insertGetId($versao);
         } else {
-            $versao = VersaoModel::find($request->id_versao);
+            DB::table('versao')->where('id_versao', $request->id_versao)->update($versao);
+            $id_versao = $request->id_versao;
         }
 
-        $versao->id_aplicativo = $id_aplicativo;
-        $versao->incompativel = $request->incompativel;
-        $versao->implementacao = $request->implementacao;
-        $versao->correcao = $request->correcao;
-        $versao->pre_lancamento = $request->pre_lancamento;
-        $versao->identificador = $request->identificador;
-        $versao->descricao_implementacao = $request->descricao_implementacao;
-        $versao->descricao_correcao = $request->descricao_correcao;
-        $versao->arquivo = $request->arquivo;
-        $versao->sql = $request->sql;
-        $versao->script = $request->script;
+        if ($request->gerar_arquivo) {
+            self::gerarArquivo($id_aplicativo, $id_versao);
+        }
 
-        $versao->save();
+        if ($request->enviar_arquivo) {
+            self::enviarArquivo($id_aplicativo, $id_versao);
+        }
 
         return redirect('/aplicativo/'.$id_aplicativo.'/versao');
     }
@@ -118,44 +141,189 @@ class VersaoController extends Controller
     }
 
     /**
-     * Envia a versao para o servidor
+     * Gera arquivo e redireciona
+     *
+     * @param  int  $id_aplicativo
+     * @param  int  $id_versao
+     * @return \Illuminate\Http\Response
+     */
+    public function gerar($id_aplicativo, $id_versao)
+    {
+        self::gerarArquivo($id_aplicativo, $id_versao);
+
+        return redirect('/aplicativo/'.$id_aplicativo.'/versao');
+    }
+
+    /**
+     * Envia arquivo e redireciona
+     *
+     * @param  int  $id_aplicativo
+     * @param  int  $id_versao
+     * @return \Illuminate\Http\Response
+     */
+    public function enviar($id_aplicativo, $id_versao)
+    {
+        self::enviarArquivo($id_aplicativo, $id_versao);
+
+        return redirect('/aplicativo/'.$id_aplicativo.'/versao');
+    }
+
+    /**
+     * Gera arquivo .tar.gz com as modificações da versão
      *
      * @param int $id_aplicativo
      * @param int $id_versao
      * @return \Illuminate\Http\Response
      */
-    public function enviar($id_aplicativo, $id_versao)
+    protected static function gerarArquivo($id_aplicativo, $id_versao)
     {
         $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
         $versao = VersaoModel::find($id_versao);
 
         $aplicativo_none = str_replace(' ', '_', strtolower($aplicativo->nome));
         $desenvolvimento = $aplicativo->desenvolvimento;
-        $producao = $aplicativo->producao;
-        $arquivos = explode("\r\n", $versao->arquivo);
-
-        $compactar_arquivos = '';
-
-        foreach ($arquivos as $key => $value) {
-            $compactar_arquivos .= ' '.$desenvolvimento.'/'.$value;
-        }
-
         $temp_dir = sys_get_temp_dir();
-        $arquivo_tar = $aplicativo_none.'_v'.$versao->id_versao.'.tar';
+     
+        $pasta_temp = $temp_dir. '/' .base64_encode($id_versao);
 
-        exec('tar -cf '.$temp_dir.'/'.$arquivo_tar.' '.$compactar_arquivos);
-        exec('gzip -9f '.$temp_dir.'/'.$arquivo_tar);
+        if (self::criar_novo_diretorio($pasta_temp)) {
 
-        if (!file_exists(__DIR__.'/../../../storage/app/'.$aplicativo_none)) {
-            exec('sudo mkdir '.__DIR__.'/../../../storage/app/'.$aplicativo_none);
-            exec('sudo chmod 757 '.__DIR__.'/../../../storage/app/'.$aplicativo_none);
+            if ($versao->sql) {
+
+                self::criar_novo_arquivo($pasta_temp.'/sql.sql');
+
+                $file = fopen($pasta_temp.'/sql.sql', 'w') or die("Erro ao abrir o arquivo sql!");
+                fwrite($file, $versao->sql);
+                fclose($file);
+            }
+
+            if ($versao->script) {
+
+                self::criar_novo_arquivo($pasta_temp.'/script.sh');
+
+                $file = fopen($pasta_temp.'/script.sh', 'w') or die("Erro ao abrir o arquivo script!");
+                fwrite($file, $versao->script);
+                fclose($file);
+            }
+
+            if ($versao->arquivo) {
+
+                self::criar_novo_diretorio($pasta_temp.'/arquivo');
+                
+                $arquivos = explode("\r\n", $versao->arquivo);
+
+                foreach ($arquivos as $key => $value) {
+                    exec('cp -r '.$desenvolvimento.'/'.$value .' '.$pasta_temp.'/arquivo');
+                }
+            }
+
+            if ($versao->sql || $versao->script || $versao->arquivo) {
+
+                $storage_app = __DIR__.'/../../../storage/app/'.$aplicativo_none;
+
+                if (!file_exists($storage_app)) {
+                    exec('mkdir '.$storage_app);
+                    exec('chmod 656 '.$storage_app);
+                }
+
+                $versao_nome = VersaoModel::getVersao($id_aplicativo, $id_versao);
+                $arquivo_tar = $aplicativo_none.'_v'.$versao_nome.'.tar';
+
+                exec('tar -cf '.$storage_app.'/'.$arquivo_tar.' '.$pasta_temp.'/*');
+                exec('gzip -9f '.$storage_app.'/'.$arquivo_tar);
+
+                $versao->arquivo_gerado = 1;
+                $versao->arquivo_nome = $arquivo_tar.'.gz';
+                $versao->save();
+            }
+        }
+    }
+
+    /**
+     * Cria um novo arquivo vazio
+     *
+     * Se arquivo já existir, exclui e cria novamente.
+     *
+     * @return boolean
+     */
+    protected static function criar_novo_arquivo($nome_arquivo) {
+        if (file_exists($nome_arquivo)) {
+            unlink($nome_arquivo);
+        }
+        return touch($nome_arquivo);
+    }
+
+    /**
+     * Cria um novo diretório vazio
+     *
+     * Se diretório já existir, exclui e cria novamente.
+     *
+     * @return boolean
+     */
+    protected static function criar_novo_diretorio($nome_diretorio) {
+        if (file_exists($nome_diretorio)) {
+            self::excluir_recursivo($nome_diretorio);
+        }
+        return mkdir($nome_diretorio);
+    }
+
+    /**
+     * Excluir de modo recursivo um diretório
+     *
+     * @return void
+     */
+    protected static function excluir_recursivo($nome_diretorio) {
+        $conteudo = scandir($nome_diretorio);
+        if ($conteudo) {
+            foreach ($conteudo as $value) {
+                if (!in_array($value, array('.', '..'))) {
+                    $caminho = $nome_diretorio. '/' .$value;
+                    if (!is_dir($caminho)) {
+                        unlink($caminho);
+                    }
+                    else {
+                        self::excluir_recursivo($caminho);
+                    }
+                }
+            }
+            rmdir($nome_diretorio);
+        }
+    }
+
+    /**
+     * Enviar arquivo .tar.gz com as modificações da versão para o servidor de produção
+     *
+     * @param int $id_aplicativo
+     * @param int $id_versao
+     * @return \Illuminate\Http\Response
+     */
+    protected static function enviarArquivo($id_aplicativo, $id_versao)
+    {
+        $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
+        $versao = VersaoModel::find($id_versao);
+
+        if (!$versao->arquivo_gerado) {
+            self::gerarArquivo($id_aplicativo, $id_versao);
         }
 
-        exec('mv '.$temp_dir.'/'.$arquivo_tar.'.gz '.__DIR__.'/../../../storage/app/'.$aplicativo_none);
+        $aplicativo_none = str_replace(' ', '_', strtolower($aplicativo->nome));
+        
+        $storage_local = __DIR__.'/../../../storage/app/'.$aplicativo_none;
+        $storage_servidor = "/opt/updater/". $aplicativo_none ."/versoes/";
+        
+        $versao_nome = VersaoModel::getVersao($id_aplicativo, $id_versao);
+        $arquivo_nome = $aplicativo_none.'_v'.$versao_nome.'.tar.gz';
 
-        $versao->enviado = 1;
-        $versao->save();
+        $arquivo_tar = $storage_local .'/'. $arquivo_nome;
 
-        return redirect('/aplicativo/'.$id_aplicativo.'/versao');
+        if (file_exists($arquivo_tar)) {
+            exec("sudo ssh root@192.168.56.10 \"mkdir -p ". $storage_servidor ."\"");
+            exec("sudo scp ". $arquivo_tar ." root@192.168.56.10:".$storage_servidor);
+            $versao->arquivo_enviado = 1;
+            $versao->data_envio = date('Y-m-d H:i:s');
+            $versao->save();
+        }
+
     }
+
 }
