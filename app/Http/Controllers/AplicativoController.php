@@ -127,6 +127,15 @@ class AplicativoController extends Controller
     public function destroy($id_aplicativo)
     {
         //
+        $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
+
+        $aplicativo_none = str_replace(' ', '_', strtolower($aplicativo->nome));
+        
+        $storage_local = __DIR__.'/../../../storage/app/'.$aplicativo_none;
+
+        exec("sudo rm -r ". $storage_local);
+
+        //
         DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->delete();
 
         return redirect('/aplicativo');

@@ -1,6 +1,6 @@
 <?php
 
-namespace Updater;
+namespace Updater\Models;
 
 use Illuminate\Database\Eloquent\Model;
 

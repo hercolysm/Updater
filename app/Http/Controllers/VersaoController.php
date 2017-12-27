@@ -229,8 +229,8 @@ class VersaoController extends Controller
                 $versao_nome = VersaoModel::getVersao($id_aplicativo, $id_versao);
                 $arquivo_tar = $aplicativo_none.'_v'.$versao_nome.'.tar';
 
-                exec('tar -cf '.$storage_app.'/'.$arquivo_tar.' '.$pasta_temp.'/*');
-                exec('gzip -9f '.$storage_app.'/'.$arquivo_tar);
+                exec('sudo tar -cf '.$storage_app.'/'.$arquivo_tar.' '.$pasta_temp.'/*');
+                exec('sudo gzip -9f '.$storage_app.'/'.$arquivo_tar);
 
                 $versao->arquivo_gerado = 1;
                 $versao->arquivo_nome = $arquivo_tar.'.gz';
@@ -309,20 +309,21 @@ class VersaoController extends Controller
         $aplicativo_none = str_replace(' ', '_', strtolower($aplicativo->nome));
         
         $storage_local = __DIR__.'/../../../storage/app/'.$aplicativo_none;
-        $storage_servidor = "/opt/updater/". $aplicativo_none ."/versoes/";
+        $storage_servidor = "/opt/updater/app/". $aplicativo_none;
         
         $versao_nome = VersaoModel::getVersao($id_aplicativo, $id_versao);
         $arquivo_nome = $aplicativo_none.'_v'.$versao_nome.'.tar.gz';
 
         $arquivo_tar = $storage_local .'/'. $arquivo_nome;
 
-        if (file_exists($arquivo_tar)) {
-            exec("sudo ssh root@192.168.56.10 \"mkdir -p ". $storage_servidor ."\"");
-            exec("sudo scp ". $arquivo_tar ." root@192.168.56.10:".$storage_servidor);
-            $versao->arquivo_enviado = 1;
-            $versao->data_envio = date('Y-m-d H:i:s');
-            $versao->save();
-        }
+        $hash = VersaoModel::getHash($id_versao);
+
+        exec("sudo ssh root@192.168.56.10 \"mkdir -p ". $storage_servidor ."/versoes/\"");
+        exec("sudo scp ". $arquivo_tar ." root@192.168.56.10:".$storage_servidor ."/versoes/");
+        exec("sudo ssh root@192.168.56.10 \"echo ".$hash." >> ". $storage_servidor ."/lista.txt\"");
+        //$versao->arquivo_enviado = 1;
+        $versao->data_envio = date('Y-m-d H:i:s');
+        $versao->save();
 
     }
 

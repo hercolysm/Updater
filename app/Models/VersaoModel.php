@@ -68,4 +68,31 @@ class VersaoModel extends Model
         return ($id_versao_atual) ? self::getVersao($id_aplicativo, $id_versao_atual) : '-';
     }
 
+    /**
+     *
+     *
+     *
+     */
+    public static function getHash($id_versao) {
+        
+        $versao = self::find($id_versao);
+
+        $id_aplicativo = $versao->id_aplicativo;
+
+        $aplicativo = AplicativoModel::find($id_aplicativo);
+
+        $versao_nome = self::getVersao($id_aplicativo, $id_versao);
+
+        $info = [
+            'id_versao' => $id_versao,
+            'versao' => $versao_nome,
+            'sql' => ($versao->sql) ? true : false,
+            'script' => ($versao->script) ? true : false,
+            'arquivo' => ($versao->arquivo) ? true : false,
+            'local_projeto' => $aplicativo->desenvolvimento
+        ];
+
+        return base64_encode(json_encode($info));
+    }
+
 }
