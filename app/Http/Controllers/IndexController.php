@@ -22,7 +22,7 @@ class IndexController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function sobre() {
-        $readme = __DIR__ . '/../../../README.md';
+        $readme = $_SERVER['DOCUMENT_ROOT'] . '/../README.md';
         
         if (file_exists($readme)) {
             $file = fopen($readme, 'r');

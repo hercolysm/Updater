@@ -72,6 +72,7 @@
             <div class="top-right links">
                 @yield('top_right')
                 @auth
+                    <a href="{{ '/usuario' }}">Usuários</a>
                     <a href="{{ route('logout') }}">Sair</a>
                 @else
                     <a href="{{ route('login') }}">Entrar</a>

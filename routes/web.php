@@ -15,6 +15,10 @@ Route::get('/', function () {
 	return view('index');
 });
 
+Route::get('/home', function () {
+	return view('index');
+});
+
 Auth::routes();
 
 Route::get('/sobre', 'IndexController@sobre');
@@ -54,3 +58,13 @@ Route::get('/aplicativo/{id_aplicativo}/versao/gerar/{id_versao}', 'VersaoContro
 Route::get('/aplicativo/{id_aplicativo}/versao/enviar/{id_versao}', 'VersaoController@enviar');
 
 Route::get('/aplicativo/{id_aplicativo}/sobre', 'AplicativoController@sobre');
+
+Route::get('/usuario', 'UsuarioController@index');
+
+Route::get('/usuario/create', 'UsuarioController@create');
+
+Route::get('/usuario/edit/{id_usuario}', 'UsuarioController@edit');
+
+Route::post('/usuario/store', 'UsuarioController@store');
+
+Route::get('/usuario/destroy/{id}', 'UsuarioController@destroy');

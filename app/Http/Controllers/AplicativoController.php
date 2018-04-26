@@ -73,6 +73,8 @@ class AplicativoController extends Controller
         if (!$id_aplicativo) {
             $aplicativo['created_at'] = $date;
             DB::table('aplicativo')->insert($aplicativo);
+
+            self::destroy_storage($nome);
         } else {
             DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->update($aplicativo);
         }
@@ -129,16 +131,23 @@ class AplicativoController extends Controller
         //
         $aplicativo = DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->first();
 
-        $aplicativo_none = str_replace(' ', '_', strtolower($aplicativo->nome));
-        
-        $storage_local = __DIR__.'/../../../storage/app/'.$aplicativo_none;
+        self::destroy_storage($aplicativo->nome);
 
-        exec("sudo rm -r ". $storage_local);
-
-        //
         DB::table('aplicativo')->where('id_aplicativo', $id_aplicativo)->delete();
 
         return redirect('/aplicativo');
+    }
+
+    /**
+     * Remove arquivos do aplicativos
+     *
+     * @param string $aplicativo_nome
+     * @return void
+     */
+    public function destroy_storage($aplicativo_none)
+    {
+        $app_nome = str_replace(' ', '_', strtolower($aplicativo_none));
+        exec("sudo rm -rf " . $_SERVER['DOCUMENT_ROOT'] . '/../storage/app/' . $app_nome);
     }
 
     /**
